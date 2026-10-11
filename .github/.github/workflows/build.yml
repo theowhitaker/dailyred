@@ -1,0 +1,35 @@
+name: Build Daily Red ROM
+on:
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Run macOS setup toolchain
+        run: bash scripts/setup-macos.sh
+
+      - name: Get PokeFireRed source
+        run: bash scripts/get-pokefirered.sh
+
+      - name: Fetch web emulator vendor files
+        run: bash scripts/fetch-vendor.sh
+
+      - name: Build the ROM
+        run: bash scripts/build-rom.sh
+
+      - name: Commit and push generated files back to Repo
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add web/game/dailyred.gba.gz web/vendor/ -f
+          git commit -m "Add compiled ROM and emulator vendor files"
+          git push
